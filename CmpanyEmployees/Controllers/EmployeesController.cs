@@ -22,15 +22,19 @@ namespace CmpanyEmployees.Controllers
         private readonly IRepositoryManager _repository;
         private readonly ILoggerManager _logger;
         private readonly IMapper _mapper;
+        private readonly IDataShaper<EmployeeDto> _dataShaper;
 
-        public EmployeesController(IRepositoryManager repository, ILoggerManager logger, IMapper mapper)
+        public EmployeesController(IRepositoryManager repository, ILoggerManager logger, 
+            IMapper mapper, IDataShaper<EmployeeDto> dataShaper)
         {
             _repository = repository;
             _logger = logger;
             _mapper = mapper;
+            _dataShaper = dataShaper;
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
         public async Task<IActionResult> GetEmployeesForCompany(Guid companyId, [FromQuery] EmployeeParameters employeeParameters)
         {
             if (!employeeParameters.ValidAgeRange)
@@ -49,9 +53,9 @@ namespace CmpanyEmployees.Controllers
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(employeesFromDb.MetaData));
 
-            var employeeDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
+            var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
 
-            return Ok(employeeDto);
+            return Ok(_dataShaper.ShapeData(employeesDto, employeeParameters.Fields));
         }
 
         [HttpGet("{id}", Name = "GetEmployeeForCompany")]
