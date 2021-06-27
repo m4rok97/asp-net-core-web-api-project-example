@@ -46,7 +46,10 @@ namespace CmpanyEmployees
             services.ConfigureControllers();
             services.ConfigureApiBehavior();
             services.AddMemoryCache();
-            
+
+            services.AddAuthentication();
+            services.ConfigureIdentity();
+
             //services.AddHttpContextAccessor();
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ValidationFilterAttribute>();
