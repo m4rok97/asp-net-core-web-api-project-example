@@ -8,6 +8,8 @@ using System.Xml;
 
 namespace Entities.Models
 {
+
+    // This class is uncomplete
     public class Entity
     {
         private void WriteLinksToXml(string key, object value, XmlWriter writer)
