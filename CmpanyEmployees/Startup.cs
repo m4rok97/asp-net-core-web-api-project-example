@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using CmpanyEmployees.ActionFilters;
 using CmpanyEmployees.Extensions;
 using Contracts;
@@ -39,20 +40,22 @@ namespace CmpanyEmployees
             services.ConfigureLoggerService();
             services.ConfigureSqlContext(Configuration);
             services.ConfigureRepositoryManager();
+            services.ConfigureVersioning();
+            services.ConfigureResponseCaching();
+            services.ConfigureHttpCacheHeaders();
+            services.ConfigureControllers();
+            services.ConfigureApiBehavior();
+            services.AddMemoryCache();
+            
+            //services.AddHttpContextAccessor();
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ValidationFilterAttribute>();
             services.AddScoped<ValidateCompanyExistsAttribute>();
             services.AddScoped<ValidateEmployeeForCompanyExistsAttribute>();
             services.AddScoped<ValidateMediaTypeAttribute>();
             services.AddScoped<IDataShaper<EmployeeDto>, DataShaper<EmployeeDto>>();
-            services.AddControllers(config => {
-                config.RespectBrowserAcceptHeader = true;
-                config.ReturnHttpNotAcceptable = true;
-            }).AddNewtonsoftJson()
-            .AddXmlDataContractSerializerFormatters()
-            .AddCustomCSVFormatter();
-            services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
 
+            //services.ConfigureRateLimitingOptions();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -81,6 +84,11 @@ namespace CmpanyEmployees
                 ForwardedHeaders = ForwardedHeaders.All
             });
 
+            app.UseResponseCaching();
+
+            app.UseHttpCacheHeaders();
+
+            //app.UseIpRateLimiting();
 
             app.UseRouting();
 
