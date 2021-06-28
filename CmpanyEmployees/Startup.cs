@@ -1,5 +1,6 @@
 using AspNetCoreRateLimit;
 using CmpanyEmployees.ActionFilters;
+using CmpanyEmployees.Authentication;
 using CmpanyEmployees.Extensions;
 using Contracts;
 using Entities.DataTransferObjects;
@@ -45,10 +46,12 @@ namespace CmpanyEmployees
             services.ConfigureHttpCacheHeaders();
             services.ConfigureControllers();
             services.ConfigureApiBehavior();
+            services.ConfigureSwagger();
             services.AddMemoryCache();
 
             services.AddAuthentication();
             services.ConfigureIdentity();
+            services.ConfigureJWT(Configuration);
 
             //services.AddHttpContextAccessor();
             services.AddAutoMapper(typeof(Startup));
@@ -57,6 +60,7 @@ namespace CmpanyEmployees
             services.AddScoped<ValidateEmployeeForCompanyExistsAttribute>();
             services.AddScoped<ValidateMediaTypeAttribute>();
             services.AddScoped<IDataShaper<EmployeeDto>, DataShaper<EmployeeDto>>();
+            services.AddScoped<IAuthenticationManager, AuthenticationManager>();
 
             //services.ConfigureRateLimitingOptions();
         }
@@ -93,9 +97,18 @@ namespace CmpanyEmployees
 
             //app.UseIpRateLimiting();
 
+            app.UseAuthentication();
+
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(s =>
+            {
+                s.SwaggerEndpoint("/swagger/v1/swagger.json", "Code Maze API v1");
+                s.SwaggerEndpoint("/swagger/v2/swagger.json", "Code Maze API v2");
+            });
 
             app.UseEndpoints(endpoints =>
             {
